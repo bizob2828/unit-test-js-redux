@@ -1,0 +1,13 @@
+{
+  "name": "unit-testing-js-redux",
+  "version": "1.0.0",
+  "description": "Introduction to unit tests in javascript with jest",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Bob Evans",
+  "license": "MIT",
+  "dependencies": {
+  }
+}
