@@ -1,0 +1,327 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/black.css" id="theme">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css" id="highlight-theme">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h1>Unit Testing in JS</h1>
+          <h3>What are you waiting for?</h3>
+					<p>
+          <small>Bob Evans - Sr DevOps Engineer, Whitebox</small>
+					</p>
+				</section>
+
+        <section>
+          <h2>Definition</h2>
+					<blockquote cite="https://en.wikipedia.org/wiki/Unit_testing">
+            &ldquo;Unit testing is a software testing method by which individual units of source code, sets of one or more computer program modules together with associated control data, usage procedures, and operating procedures, are tested to determine whether they are fit for use&rdquo; - Wikipedia;
+					</blockquote>
+        </section>
+        <section>
+          <h2>Definition</h2>
+          <blockquote cite="me">
+            &ldquo;Unit testing is the process of asserting flow of a method by isolating external code via mocking its surroundings and dependencies.&rdquo; - Me
+          </blockquote>
+        </section>
+
+				<section>
+          <section>
+            <h2>Let's Get Real</h2>
+            <h3>Who Writes...</h3>
+            <ul>
+            <li class="fragment">unit tests?</li>
+            <li class="fragment">unit tests in JavaScript?</li>
+            <li class="fragment">unit tests for most code?</li>
+            <li class="fragment">unit tests for all code with ~100% coverage</li>
+            </ul>
+          </section>
+          <section tagcloud>
+            I Don't Know How
+            I Don't Have Time
+            Client Doesn't Pay Me To Test
+            It Takes Too Long
+            The Code is Too Hard To Test
+            Too Lazy
+            Can't Figure Out My Toolchain
+            Legacy Software
+            We have a QA Team
+          </section>
+          <section>
+            <h2>Benefits</h2>
+            <ul>
+              <li class="fragment">can write code faster</li>
+              <li class="fragment">minimizes refactor risk</li>
+              <li class="fragment">maximizes confidence in code</li>
+              <li class="fragment">improves overall design of code by making it testable</li>
+              <li class="fragment">serves as documentation to other members of team</li>
+            </ul>
+          </section>
+				</section>
+
+        <section>
+          <section>
+            <h2>What it is not</h2>
+            <ul>
+            <li class="fragment">Integration testing</li>
+            <li class="fragment">Functional testing</li>
+            <li class="fragment">Blackbox testing</li>
+            <li class="fragment">User Acceptance Testing</li>
+            <li class="fragment">Manual Testing</li>
+            </ul>
+          </section>
+          <section>
+            <h2>What it should do</h2>
+            <ul>
+            <li class="fragment">Assert something</li>
+            <li class="fragment">Isolate code with stubs</li>
+            <li class="fragment">Affect internal code by mocking out different external behaviors</li>
+            </ul>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Bad - No Assertions
+              ```
+              function greet(name) {
+                return 'Hi ' + name;
+              }
+
+              it('should greet', function() {
+                greet('name');
+              });
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Good - Assertion
+              ```
+              function greet(name) {
+                return 'Hi ' + name;
+              }
+
+              it('should say hi to name', function() {
+                expect(greet('Ron Swanson')).toEqual('Hi Ron Swanson');
+              });
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Bad - No Stub
+              ```
+              # utils.js
+              const utils = module.exports;
+
+              let peepsToCall = [];
+
+              let users = {
+                bizob2828: 'Bob Evans',
+                arei: 'Glen Goodwin'
+              };
+
+              utils.getUser = function(username) {
+                return users[username];
+              }
+
+              utils.callMeLater = function(name) {
+                peepsToCall.push(name);
+              }
+
+              utils.getName = function(user) {
+                let name = utils.getUser(user);
+
+                if(name === 'Bob Evans') {
+                  utils.callMeLater('Carly Rae');
+                  return 'Down on the Farm';
+                }
+
+                return name;
+              }
+
+              # utils.test.js
+              it('should get my name by user', function() {
+                var name = getName('bizob2828');
+                expect(name).toEqual('Down on the Farm');
+                expect(peepsToCall).toEqual(['Carly Rae']);
+              });
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Good - Stub out external functions
+              ```
+
+              let peepsToCall = [];
+
+              let users = {
+                bizob2828: 'Bob Evans',
+                arei: 'Glen Goodwin'
+              };
+
+              function getUser(username) {
+                return users[username];
+              }
+
+              function callMeLater(name) {
+                peepsToCall.push(name);
+              }
+
+              function getName(user) {
+                if
+                let name = getUser(user);
+
+                if(name === 'Bob Evans') {
+                  callMeLater('Carly Rae');
+                  return 'Down on the Farm';
+                }
+
+                return name;
+              }
+
+
+              it('should get my name by user', function() {
+                callMeLater = jest.fn();
+                var name = getName('bizob2828');
+                expect(name).to.equal('Down on the Farm');
+                expect(callMeLater).toHaveBeenCalledWith('Carly Rae');
+              });
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Bad - No Mocks
+              ```
+              #my-mod.js
+
+              const fetch = require('node-fetch');
+              const logger = require('pino');
+
+
+              async function getName(name) {
+                try {
+                  const response = await fetch(`https://myapi.com/user/${name}`);
+                  return await response.json();
+                } catch(err) {
+                  logger.error('Failed to fetch %s, %j', name, err);
+                  throw err;
+                }
+
+              }
+
+              #my-mod.test.js
+
+              it('should get my name by user', async function() {
+                var name = await getName('bizob2828');
+                expect(name).to.deep.equal({ name: 'Bob Evans' });
+              });
+
+              // Very hard to test a failure here without knowing more about the API
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Good - Mock Out External Deps
+              ```
+              # my-mod.js
+              const fetch = require('node-fetch');
+              const logger = require('pino')();
+
+              async function getName(name) {
+                try {
+                  const response = await fetch(`https://myapi.com/user/${name}`);
+                  return await response.json();
+                } catch(err) {
+                  logger.error('Failed to fetch %s, %j', name, err);
+                  throw err;
+                }
+
+              }
+
+              my-mod.test.js
+
+              let fetch, logger;
+
+              beforeEach(() => {
+                jest.mock('node-fetch');
+                jest.mock('pino');
+                fetch = require('node-fetch');
+                logger = require('pino')();
+              });
+
+              it('should get my name by user', async () => {
+                const responseMock = { json: jest.fn().mockResolvedValue({ name: 'Bob Evans'}) };
+                fetch.mockResolvedValue(responseMock);
+                const name = await getName('bizob2828');
+                expect(name).toEqual({ name: 'Bob Evans' });
+                expect(logger.error).toHaveBeenCalledTimes(0);
+              });
+
+              it('should log error when request fails', async () => {
+                const err = new Error('fetch failed');
+                fetch.mockRejectedValue(err);
+                await expect(() => {
+                  await getName('Bob Evans');
+                }).rejects.toThrow(err);
+                expect(logger.error).toHaveBeenCalledWith('Failed to fetch %s, %j', 'Bob Evans', err);
+              });
+              ```
+            </script>
+          </section>
+        </section>
+
+        <section>
+          <h2>Frameworks, Assertion Libraries, Etc</h2>
+          <ul>
+            <li class="fragment">Frameworks: Jest, Mocha, Jasmine, Tap</li>
+            <li class="fragment">Assertion Libs: assert, should.js, expect.js, chai</li>
+            <li class="fragment">Mocking Libs: sinon, mirage, nock</li>
+            <li class="fragment">Code Coverage: v8, istanbuli, blanket</li>
+          </ul>
+
+        </section>
+
+        <section>
+          <h1>DEMO</h1>
+        </section>
+        <section>
+          <h1>QUESTIONS?
+        </section>
+			</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ],
+        dependencies: [
+          { src: 'plugin/tagcloud/tagcloud.js', async: true }
+        ]
+			});
+		</script>
+	</body>
+</html>
