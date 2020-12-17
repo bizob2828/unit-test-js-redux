@@ -86,7 +86,7 @@
             <h2>What it should do</h2>
             <ul>
             <li class="fragment">Assert something</li>
-            <li class="fragment">Isolate code with stubs</li>
+            <li class="fragment">Isolate code with mocks</li>
             <li class="fragment">Affect internal code by mocking out different external behaviors</li>
             </ul>
           </section>
@@ -95,7 +95,7 @@
               ## Bad - No Assertions
               ```
               function greet(name) {
-                return 'Hi ' + name;
+                return `Hi ${name}`;
               }
 
               it('should greet', function() {
@@ -107,9 +107,9 @@
           <section data-markdown>
             <script type="text/template">
               ## Good - Assertion
-              ```
+              ```js
               function greet(name) {
-                return 'Hi ' + name;
+                return `Hi ${name}`;
               }
 
               it('should say hi to name', function() {
@@ -153,9 +153,8 @@
 
               # utils.test.js
               it('should get my name by user', function() {
-                var name = getName('bizob2828');
+                var name = utils.getName('bizob2828');
                 expect(name).toEqual('Down on the Farm');
-                expect(peepsToCall).toEqual(['Carly Rae']);
               });
               ```
             </script>
@@ -164,6 +163,8 @@
             <script type="text/template">
               ## Good - Stub out external functions
               ```
+              # utils.js
+              const utils = module.exports;
 
               let peepsToCall = [];
 
@@ -172,32 +173,32 @@
                 arei: 'Glen Goodwin'
               };
 
-              function getUser(username) {
+              utils.getUser = function(username) {
                 return users[username];
               }
 
-              function callMeLater(name) {
+              utils.callMeLater = function(name) {
                 peepsToCall.push(name);
               }
 
-              function getName(user) {
-                if
-                let name = getUser(user);
+              utils.getName = function(user) {
+                let name = utils.getUser(user);
 
                 if(name === 'Bob Evans') {
-                  callMeLater('Carly Rae');
+                  utils.callMeLater('Carly Rae');
                   return 'Down on the Farm';
                 }
 
                 return name;
               }
 
+              # utils.test.js
 
               it('should get my name by user', function() {
-                callMeLater = jest.fn();
-                var name = getName('bizob2828');
+                utils.callMeLater = jest.fn();
+                var name = utils.getName('bizob2828');
                 expect(name).to.equal('Down on the Farm');
-                expect(callMeLater).toHaveBeenCalledWith('Carly Rae');
+                expect(utils.callMeLater).toHaveBeenCalledWith('Carly Rae');
               });
               ```
             </script>
@@ -291,7 +292,7 @@
             <li class="fragment">Frameworks: Jest, Mocha, Jasmine, Tap</li>
             <li class="fragment">Assertion Libs: assert, should.js, expect.js, chai</li>
             <li class="fragment">Mocking Libs: sinon, mirage, nock</li>
-            <li class="fragment">Code Coverage: v8, istanbuli, blanket</li>
+            <li class="fragment">Code Coverage: v8, istanbul, blanket</li>
           </ul>
 
         </section>
